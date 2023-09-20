@@ -1,6 +1,8 @@
 package com.bolsadeideas.springboot.reactor.app;
 
+import com.bolsadeideas.springboot.reactor.app.models.Comentario;
 import com.bolsadeideas.springboot.reactor.app.models.Usuario;
+import com.bolsadeideas.springboot.reactor.app.models.UsuarioComentario;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -26,11 +28,69 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 		// ejemploIterable();
 		// ejemploFlatMap();
 		// ejemploToString();
-		ejemploToCollectList();
+		// ejemploToCollectList();
+		// ejemploUsuarioComentarioFlatMap();
+		ejemploUsuarioComentarioZipWithForma2();
 	}
 
 
+	public void ejemploUsuarioComentarioZipWithForma2() {
 
+		Mono<Usuario> usuarioMono = Mono.fromCallable(() -> new Usuario("John", "Doe"));
+		Mono<Comentario> comentarioMono = Mono.fromCallable(() -> {
+			Comentario comentarios = new Comentario();
+			comentarios.addComentarios("Comentario 1");
+			comentarios.addComentarios("Comentario 2");
+			comentarios.addComentarios("Comentario 3");
+
+			return comentarios;
+		});
+
+		Mono<UsuarioComentario> usuarioComentarioMono = usuarioMono
+				.zipWith(comentarioMono)
+				.map(tuple -> {
+					Usuario u = tuple.getT1();
+					Comentario c = tuple.getT2();
+					 return new UsuarioComentario(u, c);
+				});
+		//.subscribe(uc -> log.info(uc.toString()));
+		//usuarioMono.zipWith(comentarioMono, UsuarioComentario::new)
+		usuarioComentarioMono.subscribe(uc -> log.info(uc.toString()));
+	}
+
+	public void ejemploUsuarioComentarioZipWith() {
+
+		Mono<Usuario> usuarioMono = Mono.fromCallable(() -> new Usuario("John", "Doe"));
+		Mono<Comentario> comentarioMono = Mono.fromCallable(() -> {
+			Comentario comentarios = new Comentario();
+			comentarios.addComentarios("Comentario 1");
+			comentarios.addComentarios("Comentario 2");
+			comentarios.addComentarios("Comentario 3");
+
+			return comentarios;
+		});
+
+		Mono<UsuarioComentario> usuarioComentarioMono = usuarioMono.zipWith(comentarioMono, (usuario, comentarios) -> new UsuarioComentario(usuario, comentarios));
+					//.subscribe(uc -> log.info(uc.toString()));
+		//usuarioMono.zipWith(comentarioMono, UsuarioComentario::new)
+		usuarioComentarioMono.subscribe(uc -> log.info(uc.toString()));
+	}
+
+	public void ejemploUsuarioComentarioFlatMap() {
+
+		Mono<Usuario> usuarioMono = Mono.fromCallable(() -> new Usuario("John", "Doe"));
+		Mono<Comentario> comentarioMono = Mono.fromCallable(() -> {
+			Comentario comentarios = new Comentario();
+			comentarios.addComentarios("Comentario 1");
+			comentarios.addComentarios("Comentario 2");
+			comentarios.addComentarios("Comentario 3");
+
+			return comentarios;
+		});
+
+		usuarioMono.flatMap(u -> comentarioMono.map(c -> new UsuarioComentario(u, c)))
+				.subscribe(uc -> log.info(uc.toString()));
+	}
 	public void ejemploToCollectList() {
 
 		List<Usuario> usuariosList = new ArrayList<>();
