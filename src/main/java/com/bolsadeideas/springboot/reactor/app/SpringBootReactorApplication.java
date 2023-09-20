@@ -24,11 +24,60 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		// ejemploIterable();
-		ejemploFlatMap();
+		// ejemploFlatMap();
+		// ejemploToString();
+		ejemploToCollectList();
 	}
 
 
-	public void ejemploFlatMap() throws Exception {
+
+	public void ejemploToCollectList() {
+
+		List<Usuario> usuariosList = new ArrayList<>();
+		usuariosList.add(new Usuario("Andres", "Guzman"));
+		usuariosList.add(new Usuario("Pedro", "Ramirez"));
+		usuariosList.add(new Usuario("Camilo" ,"Vargas"));
+		usuariosList.add(new Usuario("Juan" ,"Gomez"));
+		usuariosList.add(new Usuario("Cristian", "Torres"));
+		usuariosList.add(new Usuario("Nelson" ,"Torres"));
+
+		Flux.fromIterable(usuariosList)
+				.collectList()
+				.subscribe(lista -> {
+					lista.forEach(item -> log.info(item.toString()));
+				});
+
+
+	}
+
+
+	public void ejemploToString() {
+
+		List<Usuario> usuariosList = new ArrayList<>();
+		usuariosList.add(new Usuario("Andres", "Guzman"));
+		usuariosList.add(new Usuario("Pedro", "Ramirez"));
+		usuariosList.add(new Usuario("Camilo" ,"Vargas"));
+		usuariosList.add(new Usuario("Juan" ,"Gomez"));
+		usuariosList.add(new Usuario("Cristian", "Torres"));
+		usuariosList.add(new Usuario("Nelson" ,"Torres"));
+
+		Flux.fromIterable(usuariosList)
+				.map(usuario -> usuario.getNombre().toUpperCase().concat(" ").concat(usuario.getApellido().toUpperCase() ))
+				.flatMap(nombre -> {
+					if( nombre.contains("andres".toUpperCase())) {
+						return Mono.just(nombre);
+					} else {
+						return  Mono.empty();
+					}
+				})
+
+				.map(String::toLowerCase).subscribe(log::info
+				);
+
+	}
+
+
+	public void ejemploFlatMap()  {
 
 		List<String> usuariosList = new ArrayList<>();
 		usuariosList.add("Andres Guzman");
@@ -58,8 +107,7 @@ public class SpringBootReactorApplication implements CommandLineRunner {
 	}
 
 
-	public void ejemploIterable() throws Exception {
-
+	public void ejemploIterable() {
 
 		List<String> usuariosList = new ArrayList<>();
 		usuariosList.add("Andres Guzman");
